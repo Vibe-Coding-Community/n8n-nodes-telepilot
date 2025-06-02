@@ -97,3 +97,6 @@
 
 ### Stage 13: Обновление иконки SVG
 - [x] 13.1 Изменить цвет фона SVG на синий в `nodes/TelePilot/TelePilot.svg`.
+
+### Stage 14: Исправление ошибки TypeScript
+- [x] 14.1 Устранить предупреждение о возможно неопределенной переменной `client` в `nodes/TelePilot/TelePilot.node.ts`.

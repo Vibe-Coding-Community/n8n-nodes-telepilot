@@ -361,7 +361,7 @@ export class TelePilot implements INodeType {
 		try {
 			if (resource === 'user') {
 				if (operation === 'getMe') {
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getMe',
 					});
 					returnData.push(result);
@@ -418,21 +418,21 @@ export class TelePilot implements INodeType {
 					});
 					returnData.push(result);
 				} else if (operation === 'getChats') {
-						const result = await client.invoke({
+						const result = await client!.invoke({
 							_: 'getChats',
 							limit: 9999,
 						});
 						returnData.push(result);
 				} else if (operation === 'getChat') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getChat',
 						chat_id,
 					});
 					returnData.push(result);
 				} else if (operation === 'searchPublicChat') {
 					const username = this.getNodeParameter('username', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'searchPublicChat',
 						username,
 					});
@@ -441,7 +441,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'searchPublicChats') {
 					const query = this.getNodeParameter('query', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'searchPublicChats',
 						query,
 					});
@@ -450,7 +450,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'joinChat') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'joinChat',
 						chat_id,
 					});
@@ -459,7 +459,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'openChat') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'openChat',
 						chat_id,
 					});
@@ -468,7 +468,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'closeChat') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'closeChat',
 						chat_id,
 					});
@@ -478,7 +478,7 @@ export class TelePilot implements INodeType {
 				} else if (operation === 'toggleChatIsMarkedAsUnread') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
 					const is_marked_as_unread = this.getNodeParameter('is_marked_as_unread', 0) as boolean;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'toggleChatIsMarkedAsUnread',
 						chat_id,
 						is_marked_as_unread,
@@ -488,7 +488,7 @@ export class TelePilot implements INodeType {
 					const title = this.getNodeParameter('title', 0) as string;
 					const is_channel = this.getNodeParameter('is_channel', 0) as boolean;
 					const description = this.getNodeParameter('description', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'createNewSupergroupChat',
 						title,
 						is_channel,
@@ -499,7 +499,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'deleteChat') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'deleteChat',
 						chat_id,
 					});
@@ -512,7 +512,7 @@ export class TelePilot implements INodeType {
 						.toString()
 						.split(',')
 						.map((s) => s.toString().trim());
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'addChatMembers',
 						chat_id,
 						user_ids: idsArray,
@@ -524,7 +524,7 @@ export class TelePilot implements INodeType {
 						_: this.getNodeParameter('action', 0) as string
 					};
 
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'sendChatAction',
 						chat_id,
 						action,
@@ -534,14 +534,14 @@ export class TelePilot implements INodeType {
 			} else if (resource === 'file') {
 				if (operation === 'getRemoteFile') {
 					const remote_file_id = this.getNodeParameter('remote_file_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getRemoteFile',
 						remote_file_id,
 					});
 					returnData.push(result);
 				} else if (operation === 'downloadFile') {
 					const file_id = this.getNodeParameter('file_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'downloadFile',
 						file_id,
 						priority: 16,
@@ -553,7 +553,7 @@ export class TelePilot implements INodeType {
 				if (operation === 'getMessage') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
 					const message_id = this.getNodeParameter('message_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getMessage',
 						chat_id,
 						message_id,
@@ -562,7 +562,7 @@ export class TelePilot implements INodeType {
 				} else if (operation === 'getMessageLink') {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
 					const message_id = this.getNodeParameter('message_id', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getMessageLink',
 						chat_id,
 						message_id,
@@ -570,7 +570,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'getMessageLinkInfo') {
 					const url = this.getNodeParameter('url', 0) as string;
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'getMessageLinkInfo',
 						url,
 					});
@@ -584,7 +584,7 @@ export class TelePilot implements INodeType {
 						.toString()
 						.split(',')
 						.map((s) => s.toString().trim());
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'viewMessages',
 						chat_id,
 						message_ids: idsArray,
@@ -608,7 +608,7 @@ export class TelePilot implements INodeType {
 						},
 					};
 
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'sendMessage',
 						chat_id,
 						reply_to_msg_id,
@@ -636,7 +636,7 @@ export class TelePilot implements INodeType {
 						videoCaption = null;
 					}
 
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'sendMessage',
 						chat_id,
 						reply_to_msg_id,
@@ -834,7 +834,7 @@ export class TelePilot implements INodeType {
 									};
 								}
 
-								const result = await client.invoke({
+								const result = await client!.invoke({
 									_: 'sendMessage',
 									chat_id,
 									reply_to_msg_id: outputItem.reply_to_msg_id,
@@ -894,7 +894,7 @@ export class TelePilot implements INodeType {
 					if (fileCaption === '' && fileCaption.length == 0) {
 						fileCaption = null;
 					}
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'sendMessage',
 						chat_id,
 						reply_to_msg_id,
@@ -922,7 +922,7 @@ export class TelePilot implements INodeType {
 					if (photoCaption === '' && photoCaption.length == 0) {
 						photoCaption = null;
 					}
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'sendMessage',
 						chat_id,
 						reply_to_msg_id,
@@ -955,7 +955,7 @@ export class TelePilot implements INodeType {
 						},
 					};
 
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'editMessageText',
 						chat_id,
 						message_id,
@@ -971,7 +971,7 @@ export class TelePilot implements INodeType {
 						.toString()
 						.split(',')
 						.map((s) => s.toString().trim());
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'deleteMessages',
 						chat_id,
 						message_ids: idsArray,
@@ -992,7 +992,7 @@ export class TelePilot implements INodeType {
 						.filter((s) => s.length > 0);
 
 
-					const result = await client.invoke({
+					const result = await client!.invoke({
 						_: 'forwardMessages',
 						chat_id,
 						from_chat_id,
