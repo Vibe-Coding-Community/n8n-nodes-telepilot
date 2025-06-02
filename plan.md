@@ -18,7 +18,7 @@
 
 ## Этап 2: Оптимизация процесса публикации NPM
 
-*   `[]` **Задача 2.1:** Оптимизировать GitHub Action `publish.yml` для использования стандартного NPM registry.
+*   `[x]` **Задача 2.1:** Оптимизировать GitHub Action `publish.yml` для использования стандартного NPM registry.
     *   **Обоснование:** Кастомный NPM registry `npm.telepilot.co:4873` не используется. Необходимо полностью перейти на `https://registry.npmjs.org`.
     *   **Действия:** 
         *   Установить `inputs.npm_registry` в `https://registry.npmjs.org` и удалить возможность его изменения.
@@ -26,7 +26,7 @@
         *   Убедиться, что для публикации используется `NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }}` и `actions/setup-node` с `registry-url: 'https://registry.npmjs.org'`.
         *   Удалить шаг `dkershner6/use-npm-token-action@v1`, так как `actions/setup-node` достаточно.
         *   Удалить `npm config set strict-ssl false`, так как для `registry.npmjs.org` это не требуется.
-*   `[]` **Задача 2.2:** Обновить GitHub Action `publish-check.yml` для использования стандартного NPM registry.
+*   `[x]` **Задача 2.2:** Обновить GitHub Action `publish-check.yml` для использования стандартного NPM registry.
     *   **Обоснование:** Аналогично `publish.yml`, `publish-check.yml` должен использовать `https://registry.npmjs.org`.
     *   **Действия:** Синхронизировать логику установки registry с обновленным `publish.yml`, удалив все упоминания кастомного registry.
 

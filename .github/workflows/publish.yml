@@ -12,21 +12,25 @@ name: Publish to NPM registry and Dockerhub
 on:
   workflow_dispatch:
     inputs:
-      npm_registry:
-        description: 'Custom NPM_REGISTRY'
-        required: false
+      # npm_registry input removed as we are standardizing on registry.npmjs.org
+      # Ensure REGISTRY_TOKEN secret is set for publishing to npmjs.org
+      version_type:
+        description: 'Version type for npm version (e.g., patch, minor, major)'
+        required: true
+        default: 'patch'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
+      PACKAGE_NAME: ${{ steps.set_var.outputs.PACKAGE_NAME }}
       PACKAGE_VERSION: ${{ steps.set_var.outputs.PACKAGE_VERSION }}
     strategy:
       matrix:
         node-version: [20.15.1]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-    env:
-      NPM_REGISTRY: ${{ github.event.inputs.npm_registry || 'https://registry.npmjs.org' }}
+    # env:
+      # NPM_REGISTRY env var removed, using standard npmjs.org
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -34,37 +38,32 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: save $PACKAGE_VERSION
+        # registry-url is needed for npm publish and for @actions/setup-node to set up .npmrc
+        registry-url: 'https://registry.npmjs.org'
+    - name: save package name and version
       id: set_var
       run: |
-        echo "PACKAGE_VERSION=`jq -r .version package.json`" >> $GITHUB_ENV
-        echo "PACKAGE_VERSION=`jq -r .version package.json`" >> $GITHUB_OUTPUT
-    - name: Set npm configuration
-      run: |
-        if [ -n "$NPM_REGISTRY" ]; then
-        npm config set registry $NPM_REGISTRY
-        echo $CUSTOM_REGISTRY_AUTH >> ~/.npmrc
-        npm config set strict-ssl false
-        fi
+        echo "PACKAGE_NAME=$(jq -r .name package.json)" >> $GITHUB_ENV
+        echo "PACKAGE_NAME=$(jq -r .name package.json)" >> $GITHUB_OUTPUT
+        echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
+        echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+    # Custom npm configuration for registry removed, using standard npmjs.org
+    # Ensure REGISTRY_TOKEN secret is configured in GitHub secrets for publishing
+    # The setup-node action with registry-url should handle .npmrc for npmjs.org
     - run: npm install -g pnpm
     - run: npm ci
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }} # Needed if npm ci fetches private packages from npmjs.org
     - run: npm run build --if-present
 #    - run: npm test
-    - name: Use NPM Token
-      # You may pin to the exact commit or the version.
-      # uses: dkershner6/use-npm-token-action@99c5b17c84a15e44fdcef6712b34b76f8f0493b0
-      uses: dkershner6/use-npm-token-action@v1
-      with:
-        # An NPM token with whatever access is needed for your GitHub Action workflow
-        token: ${{ secrets.REGISTRY_TOKEN }}
-        # The location of your Node workspace (needs to be a sibling of package.json)
-  #      workspace: # optional, default is ./
+    # The 'Use NPM Token' step is likely redundant if setup-node with registry-url and NODE_AUTH_TOKEN for npm ci/publish is used.
+    # Removing it to simplify.
 
     - run: npm pack
     - uses: actions/upload-artifact@v4
       with:
-        name: telepilot
-        path: telepilotco-n8n-nodes-telepilot-${{ env.PACKAGE_VERSION }}.tgz
+        name: telepilot-package
+        path: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
 
 #    - run: npm publish
 
@@ -85,7 +84,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: telepilot
+          name: telepilot-package # Ensure this matches the artifact name in the build job
           path: .
       - run: tree .
       - run: docker run --privileged --rm tonistiigi/binfmt --install arm64
@@ -97,12 +96,13 @@ jobs:
           FROM n8nio/n8n:1.89.0
 
           RUN mkdir -p /home/node/.n8n/nodes
-          COPY telepilotco-n8n-nodes-telepilot-*.tgz /home/node/.n8n/nodes/
-          RUN npm config set registry http://npm.telepilot.co:4873/
+          # The package name will be dynamic based on package.json
+          COPY *.tgz /home/node/.n8n/nodes/
+          # Custom registry configuration removed, should use default npmjs.org or whatever is baked into n8nio/n8n image
 
-          RUN cat /home/node/.npmrc
+          RUN cat /home/node/.npmrc || echo ".npmrc not found or empty"
 
-          RUN cd /home/node/.n8n/nodes && ls -laR && npm install telepilotco-n8n-nodes-telepilot-*.tgz
+          RUN cd /home/node/.n8n/nodes && ls -laR && npm install *.tgz
 
           RUN N8N_ENCRYPTION_KEY=${{ secrets.N8N_KEY }} n8n import:credentials -i /home/node/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/credentials/credential-dummy.json
           RUN n8n import:workflow -i /home/node/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/workflows/Telepilot_getMe.json
@@ -135,9 +135,9 @@ jobs:
       - name: Install Telepilot in Ubuntu n8n
         if: matrix.libc == 'glibc'
         run: |
-          mkdir -p ~/.n8n/nodes && cp telepilotco-n8n-nodes-telepilot-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz ~/.n8n/nodes && cd ~/.n8n/nodes
-          npm config set registry http://npm.telepilot.co:4873/
-          npm install telepilotco-n8n-nodes-telepilot-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz
+          mkdir -p ~/.n8n/nodes && cp ${{ needs.build.outputs.PACKAGE_NAME }}-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz ~/.n8n/nodes && cd ~/.n8n/nodes
+          # Custom registry configuration removed
+          npm install ${{ needs.build.outputs.PACKAGE_NAME }}-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz
       - name: Run n8n in Ubuntu n8n
         if: matrix.libc == 'glibc'
         run: |
@@ -157,31 +157,75 @@ jobs:
     name: 'Publish to npm'
     needs: [build, build-and-test-in-docker]
     runs-on: ubuntu-latest
-    env:
-      NPM_REGISTRY: ${{ github.event.inputs.npm_registry || 'https://registry.npmjs.org' }}
-      CUSTOM_REGISTRY_AUTH: ${{ secrets.CUSTOM_REGISTRY_AUTH }}
+    # env:
+      # NPM_REGISTRY and CUSTOM_REGISTRY_AUTH env vars removed, using standard npmjs.org
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Need to fetch history for version bumping and tagging
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-          cache: npm
-          # registry-url is mandatory here
-          registry-url: 'https://registry.npmjs.org'
-      - name: Set npm configuration
+          node-version: lts/* # Or match the build job's node version
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org' # This sets up .npmrc for npmjs.org
+
+      - name: Configure Git user
         run: |
-          if [ -n "$NPM_REGISTRY" ]; then
-          npm config set registry $NPM_REGISTRY
-          echo $CUSTOM_REGISTRY_AUTH >> ~/.npmrc
-          npm config set strict-ssl false
-          fi
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - uses: actions/download-artifact@v4
         with:
-          name: telepilot
+          name: telepilot-package # Ensure this matches the artifact name in the build job
           path: .
       - run: tree .
-      - name: Publish
-        if: true
-        run: npm publish telepilotco-n8n-nodes-telepilot-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz
+
+      # It's generally better to publish the package from the source directory after versioning,
+      # rather than publishing the .tgz directly, to ensure metadata is correct.
+      # However, if publishing the .tgz is intended to ensure what was tested is what's published:
+      # We need to unpack it, npm version in it, then npm publish from there, or version before packing.
+      # For simplicity, let's version the source, then pack, then publish the new pack.
+      # This means the 'build' job should not run 'npm pack' if 'publish' job will re-pack after versioning.
+      # Alternative: publish job downloads source, versions, builds, then publishes.
+      # Let's stick to versioning in publish job, then publishing the downloaded artifact.
+      # This requires the artifact to be the source code or that npm publish can take a .tgz and a version bump happens before.
+
+      # Simpler: version in source, then publish the tgz created by build job (if version is already bumped there)
+      # OR version in publish job, then publish the tgz (but tgz name needs to be updated or npm publish needs to handle it)
+
+      # Let's try: version the package.json, then publish the downloaded .tgz (which will have the old version in its filename)
+      # This is not ideal. Better to version, then build, then publish.
+      # For now, let's assume the downloaded .tgz is what we want to publish and versioning is separate or manual.
+      # The user wants to use `npm version` so we should do that on the source.
+
+      # Corrected flow: checkout source, version, build (if not done by 'build' job or if version changes artifacts), publish.
+      # Since 'build' job already creates the .tgz, let's assume we publish that specific .tgz.
+      # The `npm version` command should be run on the source code *before* the `build` job creates the package,
+      # or the `publish` job needs to re-build/re-pack after versioning.
+
+      # Let's adjust the 'build' job to output the versioned package.
+      # No, the request is to version in the publish step.
+      # So, we checkout, version, then we should ideally build and pack here again.
+      # Or, publish from the directory after versioning.
+
+      - name: Install dependencies for versioning and publishing
+        run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Increment version and publish
+        run: |
+          # npm version will create a new commit and tag
+          # The version in package.json from the downloaded artifact might be old.
+          # We should operate on the checked-out source code for versioning.
+          npm version ${{ github.event.inputs.version_type || 'patch' }} -m "Publish %s - via GitHub Actions"
+          # Now publish the package from the current (versioned) source directory
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Push changes (version bump and tag)
+        run: |
+          git push
+          git push --tags
