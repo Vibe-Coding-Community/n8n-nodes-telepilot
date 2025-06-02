@@ -1,231 +1,47 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Publish to NPM registry and Dockerhub
-
-# on:
-#   push:
-#     branches: [ "master" ]
-#   pull_request:
-#     branches: [ "master" ]
+name: Publish Package to NPM
 
 on:
-  workflow_dispatch:
-    inputs:
-      # npm_registry input removed as we are standardizing on registry.npmjs.org
-      # Ensure REGISTRY_TOKEN secret is set for publishing to npmjs.org
-      version_type:
-        description: 'Version type for npm version (e.g., patch, minor, major)'
-        required: true
-        default: 'patch'
+  push:
+    tags:
+      - 'v*.*.*' # Запускается по тегам вида v1.0.0, v1.2.3 и т.д.
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      PACKAGE_NAME: ${{ steps.set_var.outputs.PACKAGE_NAME }}
-      PACKAGE_VERSION: ${{ steps.set_var.outputs.PACKAGE_VERSION }}
-    strategy:
-      matrix:
-        node-version: [20.15.1]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-    # env:
-      # NPM_REGISTRY env var removed, using standard npmjs.org
-    steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        # registry-url is needed for npm publish and for @actions/setup-node to set up .npmrc
-        registry-url: 'https://registry.npmjs.org'
-    - name: save package name and version
-      id: set_var
-      run: |
-        echo "PACKAGE_NAME=$(jq -r .name package.json)" >> $GITHUB_ENV
-        echo "PACKAGE_NAME=$(jq -r .name package.json)" >> $GITHUB_OUTPUT
-        echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_ENV
-        echo "PACKAGE_VERSION=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
-    # Custom npm configuration for registry removed, using standard npmjs.org
-    # Ensure REGISTRY_TOKEN secret is configured in GitHub secrets for publishing
-    # The setup-node action with registry-url should handle .npmrc for npmjs.org
-    - run: npm install -g pnpm
-    - run: npm ci
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }} # Needed if npm ci fetches private packages from npmjs.org
-    - run: npm run build --if-present
-#    - run: npm test
-    # The 'Use NPM Token' step is likely redundant if setup-node with registry-url and NODE_AUTH_TOKEN for npm ci/publish is used.
-    # Removing it to simplify.
-
-    - run: npm pack
-    - uses: actions/upload-artifact@v4
-      with:
-        name: telepilot-package
-        path: ${{ env.PACKAGE_NAME }}-${{ env.PACKAGE_VERSION }}.tgz
-
-#    - run: npm publish
-
-  build-and-test-in-docker:
-    needs: [build]
-    name: linux-${{ matrix.platform }}-${{ matrix.libc }} - build the node addon in docker
-    runs-on: [ ubuntu-latest ]
-    strategy:
-      max-parallel: 4
-      fail-fast: false
-      matrix:
-        platform:
-          - x64
-          - arm64
-        libc:
-          - glibc
-          - musl
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: telepilot-package # Ensure this matches the artifact name in the build job
-          path: .
-      - run: tree .
-      - run: docker run --privileged --rm tonistiigi/binfmt --install arm64
-        if: matrix.platform == 'arm64' && matrix.libc == 'musl'
-      - name: Create Dockerfile to build musl docker image
-        if: matrix.libc == 'musl'
-        run: |
-          cat > Dockerfile <<EOF
-          FROM n8nio/n8n:1.89.0
-
-          RUN mkdir -p /home/node/.n8n/nodes
-          # The package name will be dynamic based on package.json
-          COPY *.tgz /home/node/.n8n/nodes/
-          # Custom registry configuration removed, should use default npmjs.org or whatever is baked into n8nio/n8n image
-
-          RUN cat /home/node/.npmrc || echo ".npmrc not found or empty"
-
-          RUN cd /home/node/.n8n/nodes && ls -laR && npm install *.tgz
-
-          RUN N8N_ENCRYPTION_KEY=${{ secrets.N8N_KEY }} n8n import:credentials -i /home/node/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/credentials/credential-dummy.json
-          RUN n8n import:workflow -i /home/node/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/workflows/Telepilot_getMe.json
-          RUN cat /home/node/.n8n/config
-
-          ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]
-          EOF
-      - name: Build n8n-alpine-dockerfile-installation
-        if: matrix.libc == 'musl'
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          platforms: linux/${{ matrix.platform == 'arm64' && 'arm64' || 'amd64' }}
-          push: false
-          no-cache: true
-          tags: n8n-alpine-dockerfile-installation
-
-      - name: Run n8n in docker image
-        if: matrix.libc == 'musl'
-        run: |
-          docker run ${{ matrix.platform == 'arm64' && '--platform linux/arm64' || '' }} \
-            --rm \
-            --name n8n-alpine-dockerfile-installation \
-            -p 5678:5678 \
-            -e DEBUG=tdl,telepilot-cred,telepilot-node,telepilot-trigger,telepilot-cm \
-            -e EXECUTIONS_PROCESS=main \
-            -e N8N_LOG_LEVEL=debug \
-            docker.io/library/n8n-alpine-dockerfile-installation execute --id r2a0u5tez9fg1WW6 > execute-result.log 2>&1 \
-            || exit 0
-      - name: Install Telepilot in Ubuntu n8n
-        if: matrix.libc == 'glibc'
-        run: |
-          mkdir -p ~/.n8n/nodes && cp ${{ needs.build.outputs.PACKAGE_NAME }}-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz ~/.n8n/nodes && cd ~/.n8n/nodes
-          # Custom registry configuration removed
-          npm install ${{ needs.build.outputs.PACKAGE_NAME }}-${{ needs.build.outputs.PACKAGE_VERSION }}.tgz
-      - name: Run n8n in Ubuntu n8n
-        if: matrix.libc == 'glibc'
-        run: |
-          N8N_HOST=0.0.0.0 N8N_PORT=5678 N8N_ENCRYPTION_KEY=${{ secrets.N8N_KEY }} npx --yes n8n@1.89.0 \
-            import:credentials -i ~/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/credentials/credential-dummy.json
-          npx n8n@1.89.0 \
-            import:workflow -i ~/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/deploy/test-n8n-imports/workflows/Telepilot_getMe.json
-          npx n8n@1.89.0 execute --id r2a0u5tez9fg1WW6 > execute-result.log 2>&1 || exit 0
-      - name: Test Telepilot GetMe execution result
-        run: |
-          cat execute-result.log
-          cat execute-result.log | grep "Please login" || exit 1
-          cat execute-result.log | grep "Close Td in state 1" || exit 2
-
-
   publish:
-    name: 'Publish to npm'
-    needs: [build, build-and-test-in-docker]
     runs-on: ubuntu-latest
-    # env:
-      # NPM_REGISTRY and CUSTOM_REGISTRY_AUTH env vars removed, using standard npmjs.org
+    permissions:
+      contents: read # Необходимо для checkout репозитория
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          # Need to fetch history for version bumping and tagging
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/* # Or match the build job's node version
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org' # This sets up .npmrc for npmjs.org
+          node-version: '20.x' # Используйте актуальную LTS версию Node.js, соответствующую вашему проекту
+          registry-url: 'https://registry.npmjs.org/'
+          # scope: '@telepilotco' # scope является частью имени пакета, setup-node использует это для .npmrc
 
-      - name: Configure Git user
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: telepilot-package # Ensure this matches the artifact name in the build job
-          path: .
-      - run: tree .
-
-      # It's generally better to publish the package from the source directory after versioning,
-      # rather than publishing the .tgz directly, to ensure metadata is correct.
-      # However, if publishing the .tgz is intended to ensure what was tested is what's published:
-      # We need to unpack it, npm version in it, then npm publish from there, or version before packing.
-      # For simplicity, let's version the source, then pack, then publish the new pack.
-      # This means the 'build' job should not run 'npm pack' if 'publish' job will re-pack after versioning.
-      # Alternative: publish job downloads source, versions, builds, then publishes.
-      # Let's stick to versioning in publish job, then publishing the downloaded artifact.
-      # This requires the artifact to be the source code or that npm publish can take a .tgz and a version bump happens before.
-
-      # Simpler: version in source, then publish the tgz created by build job (if version is already bumped there)
-      # OR version in publish job, then publish the tgz (but tgz name needs to be updated or npm publish needs to handle it)
-
-      # Let's try: version the package.json, then publish the downloaded .tgz (which will have the old version in its filename)
-      # This is not ideal. Better to version, then build, then publish.
-      # For now, let's assume the downloaded .tgz is what we want to publish and versioning is separate or manual.
-      # The user wants to use `npm version` so we should do that on the source.
-
-      # Corrected flow: checkout source, version, build (if not done by 'build' job or if version changes artifacts), publish.
-      # Since 'build' job already creates the .tgz, let's assume we publish that specific .tgz.
-      # The `npm version` command should be run on the source code *before* the `build` job creates the package,
-      # or the `publish` job needs to re-build/re-pack after versioning.
-
-      # Let's adjust the 'build' job to output the versioned package.
-      # No, the request is to version in the publish step.
-      # So, we checkout, version, then we should ideally build and pack here again.
-      # Or, publish from the directory after versioning.
-
-      - name: Install dependencies for versioning and publishing
+      - name: Install dependencies
         run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+        # env:
+          # NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Может понадобиться, если prebuilt-tdlib или другие зависимости требуют аутентификации для скачивания
 
-      - name: Increment version and publish
-        run: |
-          # npm version will create a new commit and tag
-          # The version in package.json from the downloaded artifact might be old.
-          # We should operate on the checked-out source code for versioning.
-          npm version ${{ github.event.inputs.version_type || 'patch' }} -m "Publish %s - via GitHub Actions"
-          # Now publish the package from the current (versioned) source directory
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      # Скрипт 'prepublishOnly' в package.json ('npm run build && npm run lint')
+      # будет автоматически выполнен командой 'npm publish'.
+      # Если у вас есть отдельный набор тестов, который вы хотите запустить перед публикацией:
+      # - name: Run tests
+      #   run: npm test # Предполагается, что 'npm test' настроен в вашем package.json
 
-      - name: Push changes (version bump and tag)
-        run: |
-          git push
-          git push --tags
+      - name: Align package.json version with Git tag
+        id: get_version
+        run: echo "TAG_VERSION=$(echo "${GITHUB_REF#refs/tags/v}")" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        run: npm version ${{ steps.get_version.outputs.TAG_VERSION }} --no-git-tag-version --allow-same-version
+        # --no-git-tag-version: не создавать git-тег, так как workflow уже запущен по тегу
+        # --allow-same-version: разрешить, если версия в package.json уже совпадает с тегом
+
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Убедитесь, что секрет NPM_TOKEN существует в настройках репозитория GitHub
