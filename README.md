@@ -133,15 +133,91 @@ Predefined workflows might also be available on our website: [TelePilot Workflow
 
 
 ## Troubleshooting
+ке
+You can enable DEBUG logs by running n8n with env variables. This is particularly useful for tracing issues within the `tdl` library, the node's credential handling, core node logic, trigger operations, and connection management.
 
-You can enable DEBUG logs by running n8n with env variables, here is how you do it in cli:
+Run n8n from your terminal with the following command:
 
 ```shell
 DEBUG=tdl,tdl:client,telepilot-cred,telepilot-node,telepilot-trigger,telepilot-cm N8N_LOG_LEVEL=debug npx n8n
 ```
 
-For dockerized setup, make sure you add these env variables to your docker container or docker compose
+For Docker-based n8n setups, ensure you add these environment variables to your Docker container configuration or `docker-compose.yml` file.
 
+This will provide verbose output that can help pinpoint issues during development.
+
+## Development
+
+This section outlines the process for setting up the development environment and installing the package locally within n8n.
+
+### Local Installation
+
+To work on this n8n node locally, you'll need to link it to your n8n installation. Follow these steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/telepilotco/n8n-nodes-telepilot.git
+    cd n8n-nodes-telepilot
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Build the node:**
+    ```bash
+    npm run build
+    ```
+4.  **Link the package:**
+    Navigate to the root directory of your n8n installation (or the directory where n8n is globally installed if you're linking it there) and run:
+    ```bash
+    npm link /path/to/your/n8n-nodes-telepilot
+    ```
+    Replace `/path/to/your/n8n-nodes-telepilot` with the actual absolute path to your cloned repository.
+
+    Alternatively, you can use the `Makefile` targets:
+    ```bash
+    make link
+    ```
+    This will build and link the package to the default n8n nodes directory (`~/.n8n/nodes/`).
+
+5.  **Restart n8n:**
+    If n8n is already running, you'll need to restart it to pick up the newly linked node.
+
+### Debugging
+
+For detailed debugging instructions, please refer to the [Troubleshooting](#troubleshooting) section above.
+
+## Publish to NPM
+
+Publishing a new version of this package to NPM is automated via a GitHub Actions workflow. The process is triggered by pushing a new Git tag to the repository.
+
+Here's how to publish a new version:
+
+1.  **Ensure all changes are committed:** Make sure your `main` branch (or your release branch) is up-to-date and all desired changes are committed.
+2.  **Create a new Git tag:** The tag name should correspond to the new version number (e.g., `v1.2.3`). It's crucial that the tag follows semantic versioning.
+    ```bash
+    git tag vX.Y.Z
+    ```
+    Replace `X.Y.Z` with the new version number (e.g., `v0.2.1`).
+3.  **Push the tag to GitHub:**
+    ```bash
+    git push origin vX.Y.Z
+    ```
+    Or, to push all tags:
+    ```bash
+    git push --tags
+    ```
+
+Pushing a new tag will trigger the `publish.yml` GitHub Actions workflow. This workflow will:
+
+*   Check out the code at the tagged commit.
+*   Set up Node.js.
+*   Synchronize the `version` in `package.json` with the Git tag (e.g., if the tag is `v1.2.3`, it sets the version to `1.2.3`).
+*   Install dependencies using `npm ci`.
+*   Build the project using `npm run build` (as defined in the `prepublishOnly` script in `package.json`).
+*   Publish the package to NPM using `npm publish`.
+
+You will need to have `NPM_TOKEN` configured as a secret in your GitHub repository settings for the publish step to succeed.
 
 ## Usage
 
