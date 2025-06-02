@@ -10,6 +10,7 @@ import {
 } from 'n8n-workflow';
 import {Container} from 'typedi';
 import {sleep, TelePilotNodeConnectionManager, TelepilotAuthState} from './TelePilotNodeConnectionManager';
+import { markdownToTelegramEntities } from '@vcc-community/telegramify-markdown';
 
 import {
 	operationChat,
@@ -154,7 +155,7 @@ export class TelePilot implements INodeType {
 			//Variables Group
 			variable_supergroup_id,
 			variable_audio_binary_property_name,
-			variable_send_as_voice
+			variable_send_as_voice,
 		],
 	};
 	// The execute method will go here
@@ -250,8 +251,8 @@ export class TelePilot implements INodeType {
 						case "/clear":
 							cM.deleteLocalInstance(credentials?.apiId as number)
 							returnData.push({
-								text: "Telegram Account disconnected, local session has been cleared. Please login again. " +
-											"Please check our guide at https://telepilot.co/login-howto"
+								text: "Telegram Account disconnected, local session has been cleared.\nPlease login again. Please check our guide at https://telepilot.co/login-howto\n" +
+											"Or use /help"
 							});
 							break;
 						case "/cred":
@@ -596,18 +597,23 @@ export class TelePilot implements INodeType {
 					const messageText = this.getNodeParameter('messageText', 0) as string;
 					const reply_to_msg_id = this.getNodeParameter('reply_to_msg_id', 0) as string;
 					const message_thread_id = this.getNodeParameter('message_thread_id', 0) as number;
+
+					const { text: plainMessageText, entities } = markdownToTelegramEntities(messageText);
+					const inputMessageContent: any = {
+						_: 'inputMessageText',
+						text: {
+							_: 'formattedText',
+							text: plainMessageText,
+							entities: entities,
+						},
+					};
+
 					const result = await client.invoke({
 						_: 'sendMessage',
 						chat_id,
 						reply_to_msg_id,
 						message_thread_id,
-						input_message_content: {
-							_: 'inputMessageText',
-							text: {
-								_: 'formattedText',
-								text: messageText,
-							},
-						},
+						input_message_content: inputMessageContent,
 					});
 					returnData.push(result);
 				} else if (operation === 'sendMessageVideo') {
@@ -938,17 +944,22 @@ export class TelePilot implements INodeType {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
 					const message_id = this.getNodeParameter('message_id', 0) as string;
 					const messageText = this.getNodeParameter('messageText', 0) as string;
+
+					// Revert to plain text for editMessageText
+					const inputMessageContent: any = {
+						_: 'inputMessageText',
+						text: {
+							_: 'formattedText',
+							text: messageText, // Send as plain text
+							entities: [], // No entities
+						},
+					};
+
 					const result = await client.invoke({
 						_: 'editMessageText',
 						chat_id,
 						message_id,
-						input_message_content: {
-							_: 'inputMessageText',
-							text: {
-								_: 'formattedText',
-								text: messageText,
-							},
-						},
+						input_message_content: inputMessageContent,
 					});
 					returnData.push(result);
 				} else if (operation === 'deleteMessages') {
