@@ -72,7 +72,8 @@
 ## Этап 7: Ревью и исправление ошибок после рефакторинга
 
 - [x] **Задача 7.1:** Провести ревью и исправить ошибки в `/Users/vailcody/Code/n8n-nodes-telepilot-1/nodes/TelePilot/TelePilotTrigger.node.ts`.
-- [x] **Задача 7.2:** Провести ревью и исправить ошибки в `/Users/vailcody/Code/n8n-nodes-telepilot-1/nodes/TelePilot/TelePilotNodeConnectionManager.ts`.
+- [x] 7.2 Исправить пути в `TelePilotNodeConnectionManager.ts`
+- [x] 7.3 Исправить ошибки типов и использования Client/ClientOptions в `TelePilotNodeConnectionManager.ts`
 
 ---
 Пожалуйста, обновляйте статусы задач по мере их выполнения.

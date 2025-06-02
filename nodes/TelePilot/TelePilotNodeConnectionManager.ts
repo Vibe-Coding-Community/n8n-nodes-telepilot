@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Service } from 'typedi';
 import {IDataObject} from "n8n-workflow";
 import * as tdl from 'tdl';
-import { Client } from 'tdl'; // Restoring this import
+import { Client, ClientOptions } from 'tdl'; // Restoring this import
 import { getTdjson } from 'prebuilt-tdlib';
 // Client is typically created using tdl.createClient(...)
 // const childProcess = require('child_process');
@@ -12,7 +12,6 @@ const debug = require('debug')('telepilot-cm')
 const fs = require('fs/promises');
 
 var pjson = require('../../package.json');
-const nodeVersion = pjson.version;
 
 export enum TelepilotAuthState {
 	NO_CONNECTION = "NO_CONNECTION",
@@ -39,7 +38,7 @@ function getEnumFromString(enumObj: any, str: string): any {
 }
 
 class ClientSession {
-	client: any; // Changed from typeof Client as Client is not directly imported now
+	client: Client;
 	authState: TelepilotAuthState;
 	phoneNumber: string;
 
@@ -172,7 +171,7 @@ export class TelePilotNodeConnectionManager {
 	}
 
 	async createClientSetAuthHandlerForPhoneNumberLogin(apiId: number, apiHash: string, phoneNumber: string): Promise<ClientSession> {
-		let client: typeof Client;
+		let client: Client;
 		if (this.clientSessions[apiId] === undefined) {
 			client = this.initClient(apiId, apiHash);
 			let clientSession = new ClientSession(client, TelepilotAuthState.NO_CONNECTION, phoneNumber);
@@ -205,13 +204,14 @@ export class TelePilotNodeConnectionManager {
 		// The check for existing client session was moved to createClientSetAuthHandlerForPhoneNumberLogin
 		// to ensure client is initialized only once per apiId if not existing.
 
-		const client = tdl.createClient({
+		const clientOptions: ClientOptions = {
 			apiId: apiId,
 			apiHash: apiHash,
-			database_directory: this.getTdDatabasePathForClient(apiId),
-			files_directory: this.getTdFilesPathForClient(apiId),
+			databaseDirectory: this.getTdDatabasePathForClient(apiId),
+			filesDirectory: this.getTdFilesPathForClient(apiId),
 			// log_verbosity_level: 0, // Optional: set verbosity
-		});
+		};
+		const client = tdl.createClient(clientOptions);
 
 		return client;
 	}
