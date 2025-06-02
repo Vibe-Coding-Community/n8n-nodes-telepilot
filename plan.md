@@ -76,9 +76,4 @@
 - [x] 7.3 Исправить ошибки типов и использования Client/ClientOptions в `TelePilotNodeConnectionManager.ts`
 
 ---
-
-## Этап 8: Улучшение проверки учетных данных
-
-- [x] 8.1 Реализовать метод `testConnection` в `TelePilotNodeConnectionManager.ts` для проверки соединения с Telegram.
-- [x] 8.2 Обновить `TelePilotApi.credentials.ts` для использования нового метода `testConnection`.
 Пожалуйста, обновляйте статусы задач по мере их выполнения.
