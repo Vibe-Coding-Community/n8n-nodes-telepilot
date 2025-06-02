@@ -5,7 +5,7 @@ UNAME := $(shell uname)
 init:
 	npm install n8n -g
 	npm install --save-dev babel-cli
-	pnpm install
+	npm install
 
 run-local:	build unlink link
 
@@ -17,7 +17,7 @@ clean:
 	rm -rf node_modules/
 
 unlink:
-	cd ~/.n8n/nodes/ &&	npm unlink @telepilotco/n8n-nodes-telepilot
+	cd ~/.n8n/nodes/ &&	npm unlink n8n-nodes-telepilot
 link:
 	npm link
-	cd ~/.n8n/ && mkdir -p nodes && cd nodes && npm link @telepilotco/n8n-nodes-telepilot
+	cd ~/.n8n/ && mkdir -p nodes && cd nodes && npm link n8n-nodes-telepilot
