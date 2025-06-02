@@ -66,12 +66,6 @@ export const operationLogin: INodeProperties = {
 			value: 'login',
 			action: 'Login with phone number using n8n chat',
 		},
-		// {
-		// 	name: 'Logout',
-		// 	value: 'logout',
-		// 	description: 'Logout',
-		// 	action: 'Logout',
-		// },
 		{
 			name: 'Close Session',
 			value: 'closeSession',
@@ -123,26 +117,6 @@ export const operationUser: INodeProperties = {
 			value: 'getUserFullInfo',
 			action: 'Get user full info',
 		},
-		// {
-		// 	name: 'Search User by Phone Number',
-		// 	value: 'searchUserByPhoneNumber',
-		// 	action: 'Search user by phone number',
-		// },
-		// {
-		// 	name: 'Set Bio',
-		// 	value: 'setBio',
-		// 	action: 'Set bio',
-		// },
-		// {
-		// 	name: 'Set Name',
-		// 	value: 'setName',
-		// 	action: 'Set name',
-		// },
-		// {
-		// 	name: 'Set Username',
-		// 	value: 'setUsername',
-		// 	action: 'Set username',
-		// },
 	],
 default: 'getMe',
 	noDataExpression: true,

@@ -14,9 +14,6 @@ const fs = require('fs/promises');
 var pjson = require('../../package.json');
 const nodeVersion = pjson.version;
 
-// const binaryVersion = pjson.dependencies["@telepilotco/tdlib-binaries-prebuilt"].replace("^", ""); // Removed
-// const addonVersion = pjson.dependencies["@telepilotco/tdl"].replace("^", ""); // Removed
-
 export enum TelepilotAuthState {
 	NO_CONNECTION = "NO_CONNECTION",
 	WAIT_TDLIB_PARAMS = "authorizationStateWaitTdlibParameters",
@@ -218,48 +215,6 @@ export class TelePilotNodeConnectionManager {
 
 		return client;
 	}
-
-// @ts-ignore
-	// private locateBinaryModules() { // This method is no longer needed with prebuilt-tdlib
-	//	let _lib_prebuilt_package = "tdlib-binaries-prebuilt/prebuilds/"; // Removed
-	//
-	//	let libFile = ""; // Removed
-	//	const libFolder = __dirname + "/../../../../" + _lib_prebuilt_package; // Removed
-	//
-	//	if (process.arch === "x64") { // Removed
-	//		switch (process.platform) { // Removed
-	//			case "win32": // Removed
-	//				throw new Error("Your n8n installation is currently not supported, " + // Removed
-	//					"please refer to https://telepilot.co/nodes/telepilot/#win-x64") // Removed
-	//				break; // Removed
-	//			case 'darwin': // Removed
-	//				throw new Error("Your n8n installation is currently not supported, " + // Removed
-	//					"please refer to https://telepilot.co/nodes/telepilot/#macos-x64") // Removed
-	//				break; // Removed
-	//			case 'linux': // Removed
-	//					// libFile = libFolder + "libtdjson" + ".so" // Removed
-	//					libFile = "libtdjson" + ".so" // Removed
-	//				break; // Removed
-	//			default: // Removed
-	//				throw new Error("Not implemented for " + process.platform); // Removed
-	//		} // Removed
-	//	} else if (process.arch == "arm64") { // Removed
-	//		switch (process.platform) { // Removed
-	//			case "darwin": // Removed
-	//				// 	"please refer to https://telepilot.co/nodes/telepilot/#macos-arm64") // Removed
-	//				libFile = "libtdjson" + ".dylib" // Removed
-	//				break; // Removed
-	//			case "linux": // Removed
-	//				libFile = "libtdjson" + ".so" // Removed
-	//				break; // Removed
-	//			default: // Removed
-	//				throw new Error("Your n8n installation is currently not supported, " + // Removed
-	//					"please refer to https://telepilot.co/nodes/telepilot/#win-arm64") // Removed
-	//		} // Removed
-	//	} // Removed
-	//	// return {libFile, bridgeFile}; // Removed
-	//	return {libFolder, libFile}; // Removed
-	// } // This method is no longer needed with prebuilt-tdlib
 
 	markClientAsClosed(apiId: number) {
 		debug("markClientAsClosed apiId:" + apiId)
