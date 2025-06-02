@@ -30,22 +30,13 @@
     *   **Обоснование:** Аналогично `publish.yml`, `publish-check.yml` должен использовать `https://registry.npmjs.org`.
     *   **Действия:** Синхронизировать логику установки registry с обновленным `publish.yml`, удалив все упоминания кастомного registry.
 
-## Этап 3: Анализ и минимизация зависимостей @telepilotco
-
-*   `[]` **Задача 3.1:** Заменить зависимость `@telepilotco/tdl` (`^7.4.1`) на `tdl` (`https://github.com/eilvelia/tdl`).
-    *   **Обоснование:** Переход на открытую и поддерживаемую альтернативу для работы с TDLib.
-    *   **Действия:** 
-        *   Удалить `@telepilotco/tdl` из зависимостей.
-        *   Добавить `tdl` (от `eilvelia`) в зависимости.
-        *   Проанализировать API новой библиотеки и адаптировать существующий код для работы с ней. Это может потребовать значительных изменений в `TelePilotNodeConnectionManager.ts` и других файлах, использующих TDLib.
-        *   Протестировать совместимость и функциональность.
-*   `[]` **Задача 3.2:** Обновить или заменить зависимость для бинарных файлов TDLib в соответствии с выбранной на Этапе 3.1 библиотекой `tdl`.
-    *   **Обоснование:** Библиотека `tdl` от `eilvelia` может иметь свои рекомендации по установке бинарных файлов TDLib (например, через `prebuilt-tdlib` или системную установку). <mcreference link="https://github.com/eilvelia/tdl" index="0">0</mcreference>
-    *   **Действия:** 
-        *   Удалить `@telepilotco/tdlib-binaries-prebuilt`.
-        *   Следуя документации `tdl` (eilvelia), установить необходимые бинарные файлы TDLib. Это может включать установку `prebuilt-tdlib` или настройку путей к системным библиотекам. <mcreference link="https://github.com/eilvelia/tdl" index="0">0</mcreference>
-        *   Убедиться, что `tdl.configure({ tdjson: getTdjson() })` или аналогичный механизм используется для указания пути к `libtdjson`. <mcreference link="https://github.com/eilvelia/tdl" index="0">0</mcreference>
-        *   Проверить совместимость на всех целевых платформах (Linux x64/arm64, macOS x64/arm64). <mcreference link="https://github.com/eilvelia/tdl" index="0">0</mcreference> <mcreference link="https://www.npmjs.com/package/@telecopilotco/n8n-nodes-telepilot" index="1">1</mcreference>
+### 3. Анализ и минимизация зависимостей `@telepilotco`
+- [x] **3.1. Заменить `@telepilotco/tdl` на `tdl` от `eilvelia`**
+    - [x] Обновить `package.json`.
+    - [x] Обновить импорты и использование в `TelePilotNodeConnectionManager.ts`.
+- [x] **3.2. Интегрировать `prebuilt-tdlib`**
+    - [x] Добавить `prebuilt-tdlib` в `package.json`.
+    - [x] Обновить `TelePilotNodeConnectionManager.ts` для использования `prebuilt-tdlib` для конфигурации TDLib.
 
 ## Этап 4: Очистка легаси кода в директории `deploy`
 

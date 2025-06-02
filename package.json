@@ -58,8 +58,8 @@
     "typescript": "~4.8.4"
   },
   "dependencies": {
-    "@telepilotco/tdl": "^7.4.1",
-    "@telepilotco/tdlib-binaries-prebuilt": "^1.8.14",
+    "tdl": "^8.1.0",
+    "prebuilt-tdlib": "^0.1008048.0", // Corresponds to TDLib v1.8.48, using a recent version based on search results, adjust if specific version needed.
     "@vcc-community/telegramify-markdown": "^1.0.2",
     "debug": "^4.3.4",
     "typedi": "^0.10.0"
