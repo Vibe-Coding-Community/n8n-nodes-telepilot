@@ -67,7 +67,7 @@
 
 - [x] 6.1 Update README.md with information about the new structure, how to use the examples, and any changes to the build/run process.
 - [x] 6.2 Create a short `CONTRIBUTING.md` if it doesn't exist, or update it. (Optional, can be skipped if not a priority)
-- [ ] 6.3 Final review of all changes and ensure all tasks in `plan.md` are marked correctly.
+- [x] 6.3 Final review of all changes and ensure all tasks in `plan.md` are marked correctly.
 
 ---
 Пожалуйста, обновляйте статусы задач по мере их выполнения.
