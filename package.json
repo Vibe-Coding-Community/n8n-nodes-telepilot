@@ -27,7 +27,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "build": "pnpm exec tsc && pnpm exec gulp build:icons",
+    "build": "npm exec tsc && npm exec gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials",
@@ -54,16 +54,16 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-config-prettier": "^8.5.0",
     "gulp": "^5.0.0",
-    "n8n-core": "^1.19.5",
-    "n8n-workflow": "^1.19.5",
-    "prettier": "^2.7.1",
+    "n8n-core": "^1.14.1",
+    "n8n-workflow": "^1.82.0",
+    "prettier": "^3.5.3",
     "typescript": "~4.8.4"
   },
   "dependencies": {
-    "tdl": "^8.1.0",
-    "prebuilt-tdlib": "^0.1008048.0", // Corresponds to TDLib v1.8.48, using a recent version based on search results, adjust if specific version needed.
+    "tdl": "^8.0.2",
+    "prebuilt-tdlib": "^0.1008049.0",
     "@vcc-community/telegramify-markdown": "^1.0.2",
-    "debug": "^4.3.4",
+    "debug": "^4.4.1",
     "typedi": "^0.10.0"
   }
 }
