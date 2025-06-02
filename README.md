@@ -2,9 +2,9 @@
 
 [![npm version](https://badge.fury.io/js/@telepilotco%2Fn8n-nodes-telepilot.svg)](https://www.npmjs.com/package/@telepilotco/n8n-nodes-telepilot)
 
-## Beta testing
+## Project Status & Development
 
-Current build does not have all Telegram actions implemented and does not work on all n8n installations.
+This project is under active development. While many core Telegram actions are implemented, contributions and feedback are welcome! The node is designed to be compatible with various n8n installations.
 
 Here is environment compatibility overview:
 
@@ -125,9 +125,11 @@ This is accomplished by authorizing Telepilot using your Telegram account via a 
 For more detailed information, please refer to our login guide: https://telepilot.co/login-howto
 
 
-### Import workflows
+### Example Workflows
 
-You can import predefined workflows that we have created for you, check out [this page](https://telepilot.co/workflows)
+Example workflows demonstrating various functionalities of the TelePilot nodes can be found in the `/examples` directory of this repository. You can import these `.json` files directly into your n8n instance to get started quickly.
+
+Predefined workflows might also be available on our website: [TelePilot Workflows](https://telepilot.co/workflows)
 
 
 ## Troubleshooting
@@ -143,9 +145,17 @@ For dockerized setup, make sure you add these env variables to your docker conta
 
 ## Usage
 
-This package provides various nodes and actions that allow you to interact with Telegram servers and enhance the Telegram user experience. 
-Please refer to the n8n Documentation for detailed information on each node and its usage.
-May you have any questions, reach out to per email (contact@telepilot.co) or in our [Telegram Group](https://t.me/telepilotco_group)
+This package provides various nodes and actions that allow you to interact with Telegram servers and enhance the Telegram user experience.
+
+- **Nodes**: `TelePilot` (for performing actions) and `TelePilotTrigger` (for listening to events).
+- **Credentials**: Securely store your Telegram API `api_id` and `api_hash`.
+- **Operations**: A wide range of operations are available for interacting with users, chats, groups, messages, files, and more.
+
+For detailed information on each node, its parameters, and how to use them, please refer to the node's built-in documentation within your n8n instance.
+
+Check the `/examples` directory in this repository for practical workflow examples.
+
+If you have any questions, reach out via email (contact@telepilot.co) or in our [Telegram Group](https://t.me/telepilotco_group).
 
 ## License
 

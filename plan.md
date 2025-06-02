@@ -63,5 +63,11 @@
     *   **Обоснование:** Если анализ на Этапе 3 показал, что части функционала `@telepilotco/tdl` можно заменить или реализовать иначе.
     *   **Действия:** Это потребует глубокого понимания кода и может быть значительной задачей. Выполнять только при явной выгоде (упрощение, повышение стабильности, снижение затрат на поддержку).
 
+## Этап 6: Документация и Финализация
+
+- [x] 6.1 Update README.md with information about the new structure, how to use the examples, and any changes to the build/run process.
+- [ ] 6.2 Create a short `CONTRIBUTING.md` if it doesn't exist, or update it. (Optional, can be skipped if not a priority)
+- [ ] 6.3 Final review of all changes and ensure all tasks in `plan.md` are marked correctly.
+
 ---
 Пожалуйста, обновляйте статусы задач по мере их выполнения.
