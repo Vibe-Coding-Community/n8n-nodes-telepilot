@@ -10,8 +10,8 @@ const debug = require('debug')('telepilot-trigger')
 
 import {TelePilotNodeConnectionManager, TelepilotAuthState} from "./TelePilotNodeConnectionManager";
 import { TDLibUpdateEvents } from './tdlib/updateEvents';
-import { TDLibUpdate } from './tdlib/types'
-import {Client} from "@telepilotco/tdl";
+import { TDLibUpdate } from './tdlib/types';
+import { Client } from 'tdl';
 
 
 export class TelePilotTrigger implements INodeType {

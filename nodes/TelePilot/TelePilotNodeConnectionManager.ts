@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { Service } from 'typedi';
 import {IDataObject} from "n8n-workflow";
 import * as tdl from 'tdl';
-import { Client, TdlError, TdObject } from 'tdl'; // Restoring this import
+import { Client } from 'tdl'; // Restoring this import
 import { getTdjson } from 'prebuilt-tdlib';
 // Client is typically created using tdl.createClient(...)
 // const childProcess = require('child_process');
@@ -60,8 +60,8 @@ export class TelePilotNodeConnectionManager {
 	private clientSessions: Record<number, ClientSession> = {};
 	private tdlConfigured: boolean = false;
 
-	private TD_DATABASE_PATH_PREFIX = process.env.HOME + "/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/db"
-	private TD_FILES_PATH_PREFIX = process.env.HOME + "/.n8n/nodes/node_modules/@telepilotco/n8n-nodes-telepilot/db"
+	private TD_DATABASE_PATH_PREFIX = process.env.HOME + "/.n8n/nodes/node_modules/n8n-nodes-telepilot/db"
+	private TD_FILES_PATH_PREFIX = process.env.HOME + "/.n8n/nodes/node_modules/n8n-nodes-telepilot/db"
 
 
 	constructor() {

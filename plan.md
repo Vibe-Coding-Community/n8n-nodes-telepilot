@@ -69,5 +69,10 @@
 - [x] 6.2 Create a short `CONTRIBUTING.md` if it doesn't exist, or update it. (Optional, can be skipped if not a priority)
 - [x] 6.3 Final review of all changes and ensure all tasks in `plan.md` are marked correctly.
 
+## Этап 7: Ревью и исправление ошибок после рефакторинга
+
+- [x] **Задача 7.1:** Провести ревью и исправить ошибки в `/Users/vailcody/Code/n8n-nodes-telepilot-1/nodes/TelePilot/TelePilotTrigger.node.ts`.
+- [x] **Задача 7.2:** Провести ревью и исправить ошибки в `/Users/vailcody/Code/n8n-nodes-telepilot-1/nodes/TelePilot/TelePilotNodeConnectionManager.ts`.
+
 ---
 Пожалуйста, обновляйте статусы задач по мере их выполнения.
