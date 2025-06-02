@@ -1016,6 +1016,14 @@ export class TelePilot implements INodeType {
 						supergroup_id,
 					});
 					returnData.push(result);
+				} else if (operation === 'getSupergroupTopics') {
+					const supergroup_id = this.getNodeParameter('supergroup_id', 0) as number;
+					result = await client.invoke({
+						_: 'getForumTopics',
+						chat_id: supergroup_id,
+						limit: 100, // Default TDLib limit for this call
+					});
+					returnData.push(result);
 				}
 			} else if(resource === 'request') {
 				if (operation === 'customRequest') {

@@ -216,6 +216,11 @@ export const operationGroup: INodeProperties = {
 			value: 'getSupergroupFullInfo',
 			action: 'Get supergroup full information',
 		},
+		{
+			name: 'Get Supergroup Topics',
+			value: 'getSupergroupTopics',
+			action: 'Get topics in a supergroup forum',
+		},
 	],
 default: 'getSupergroup',
 	noDataExpression: true,
@@ -756,7 +761,7 @@ export const variable_supergroup_id: INodeProperties = {
 	type: 'string',
 	displayOptions: {
 		show: {
-			operation: ['getSupergroup', 'getSupergroupFullInfo'],
+			operation: ['getSupergroupMembers', 'getSupergroup', 'getSupergroupFullInfo', 'getSupergroupTopics'],
 			resource: ['group'],
 		},
 	},
