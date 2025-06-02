@@ -11,8 +11,6 @@ const debug = require('debug')('telepilot-cm')
 
 const fs = require('fs/promises');
 
-var pjson = require('../../package.json');
-
 export enum TelepilotAuthState {
 	NO_CONNECTION = "NO_CONNECTION",
 	WAIT_TDLIB_PARAMS = "authorizationStateWaitTdlibParameters",
@@ -214,6 +212,49 @@ export class TelePilotNodeConnectionManager {
 		const client = tdl.createClient(clientOptions);
 
 		return client;
+	}
+
+	async testConnection(apiId: number, apiHash: string, phoneNumber: string): Promise<boolean> {
+		debug("testConnection for apiId: " + apiId);
+		let clientSession = this.clientSessions[apiId];
+
+		if (!clientSession || clientSession.authState !== TelepilotAuthState.WAIT_READY) {
+			clientSession = await this.createClientSetAuthHandlerForPhoneNumberLogin(apiId, apiHash, phoneNumber);
+			// Wait for authentication to complete or fail
+			let attempts = 0;
+			const maxAttempts = 30; // Wait for up to 30 seconds
+			while (clientSession.authState !== TelepilotAuthState.WAIT_READY && attempts < maxAttempts) {
+				if (clientSession.authState === TelepilotAuthState.WAIT_PHONE_NUMBER) {
+					await this.clientLoginWithPhoneNumber(apiId, apiHash, phoneNumber);
+				} else if (clientSession.authState === TelepilotAuthState.WAIT_CODE || clientSession.authState === TelepilotAuthState.WAIT_PASSWORD ){
+					// If it's waiting for code or password, it means the initial check for 'getMe' will fail, which is fine for a test.
+					// We can't proceed further without user input here.
+					debug("Connection test cannot proceed without user input for code/password.");
+					return false; // Or throw an error indicating user action is needed
+				}
+				await sleep(1000);
+				attempts++;
+				debug(`Waiting for connection ready state: ${clientSession.authState}, attempt: ${attempts}`);
+			}
+
+			if (clientSession.authState !== TelepilotAuthState.WAIT_READY) {
+				debug("Failed to reach ready state for connection test.");
+				await this.closeLocalSession(apiId).catch(e => debug("Error closing session during failed test: ", e));
+				return false;
+			}
+		}
+
+		try {
+			const me = await clientSession.client.invoke({ _: 'getMe' });
+			debug("getMe successful in testConnection: ", me);
+			// Optionally, close the session after a successful test if it's only for validation
+			// await this.closeLocalSession(apiId);
+			return true;
+		} catch (error) {
+			debug("testConnection error: ", error);
+			await this.closeLocalSession(apiId).catch(e => debug("Error closing session during failed test: ", e));
+			return false;
+		}
 	}
 
 	markClientAsClosed(apiId: number) {
