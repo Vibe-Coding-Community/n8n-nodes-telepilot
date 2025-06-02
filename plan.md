@@ -94,3 +94,6 @@
 - [x] 12.1 Обновить имя пакета на `@vcc-community/n8n-nodes-telepilot`.
 - [x] 12.2 Обновить URL репозитория на `https://github.com/Vibe-Coding-Community/n8n-nodes-telepilot.git`.
 - [x] 12.3 Удалить неактуальный скрипт `start-n8n`.
+
+### Stage 13: Обновление иконки SVG
+- [x] 13.1 Изменить цвет фона SVG на синий в `nodes/TelePilot/TelePilot.svg`.
