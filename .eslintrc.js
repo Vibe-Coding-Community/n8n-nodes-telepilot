@@ -20,19 +20,25 @@ module.exports = {
 
 	ignorePatterns: ['.eslintrc.js', '**/*.js', '**/node_modules/**', '**/dist/**'],
 
+	plugins: ['@typescript-eslint', 'prettier'],
+	extends: [
+		'eslint:recommended',
+		'plugin:@typescript-eslint/recommended',
+		'plugin:prettier/recommended',
+	],
 	overrides: [
 		{
 			files: ['package.json'],
-			plugins: ['eslint-plugin-n8n-nodes-base'],
-			extends: ['plugin:n8n-nodes-base/community'],
+			plugins: ['eslint-plugin-n8n-nodes-base', 'prettier'],
+			extends: ['plugin:n8n-nodes-base/community', 'plugin:prettier/recommended'],
 			rules: {
 				'n8n-nodes-base/community-package-json-name-still-default': 'off',
 			},
 		},
 		{
 			files: ['./credentials/**/*.ts'],
-			plugins: ['eslint-plugin-n8n-nodes-base'],
-			extends: ['plugin:n8n-nodes-base/credentials'],
+			plugins: ['eslint-plugin-n8n-nodes-base', 'prettier'],
+			extends: ['plugin:n8n-nodes-base/credentials', 'plugin:prettier/recommended'],
 			rules: {
 				'n8n-nodes-base/cred-class-field-documentation-url-missing': 'off',
 				'n8n-nodes-base/cred-class-field-documentation-url-miscased': 'off',
@@ -40,8 +46,8 @@ module.exports = {
 		},
 		{
 			files: ['./nodes/**/*.ts'],
-			plugins: ['eslint-plugin-n8n-nodes-base'],
-			extends: ['plugin:n8n-nodes-base/nodes'],
+			plugins: ['eslint-plugin-n8n-nodes-base', 'prettier'],
+			extends: ['plugin:n8n-nodes-base/nodes', 'plugin:prettier/recommended'],
 			rules: {
 				'n8n-nodes-base/node-execute-block-missing-continue-on-fail': 'off',
 				'n8n-nodes-base/node-resource-description-filename-against-convention': 'off',
