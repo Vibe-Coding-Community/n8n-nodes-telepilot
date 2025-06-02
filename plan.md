@@ -89,3 +89,8 @@
 ### Stage 11: Обновление документации README
 - [x] 11.1 Добавить раздел "Development" в `README.md` с описанием локальной установки и отладки.
 - [x] 11.2 Добавить раздел "Publish to NPM" в `README.md` с описанием процесса публикации через теги GitHub.
+
+### Stage 12: Обновление package.json
+- [x] 12.1 Обновить имя пакета на `@vcc-community/n8n-nodes-telepilot`.
+- [x] 12.2 Обновить URL репозитория на `https://github.com/Vibe-Coding-Community/n8n-nodes-telepilot.git`.
+- [x] 12.3 Удалить неактуальный скрипт `start-n8n`.

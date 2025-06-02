@@ -133,7 +133,6 @@ Predefined workflows might also be available on our website: [TelePilot Workflow
 
 
 ## Troubleshooting
-ке
 You can enable DEBUG logs by running n8n with env variables. This is particularly useful for tracing issues within the `tdl` library, the node's credential handling, core node logic, trigger operations, and connection management.
 
 Run n8n from your terminal with the following command:
