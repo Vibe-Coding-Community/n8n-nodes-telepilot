@@ -81,6 +81,14 @@ export class TelePilotNodeConnectionManager {
 		debug(Object.keys(this.clientSessions))
 		return result;
 	}
+	public retrieveExistingClient(apiId: number): Client | undefined {
+		const session = this.clientSessions[apiId];
+		if (session && session.client && session.authState === TelepilotAuthState.WAIT_READY) {
+			return session.client;
+		}
+		return undefined;
+	}
+
 	async deleteLocalInstance(apiId: number): Promise<Record<string, string>> {
 		let clients_keys = Object.keys(this.clientSessions);
 		if (!clients_keys.includes(apiId.toString()) || this.clientSessions[apiId] === undefined) {

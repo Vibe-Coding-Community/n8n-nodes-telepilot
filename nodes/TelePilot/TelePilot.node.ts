@@ -10,6 +10,7 @@ import {
 } from 'n8n-workflow';
 import {Container} from 'typedi';
 import {sleep, TelePilotNodeConnectionManager, TelepilotAuthState} from './TelePilotNodeConnectionManager';
+import { Client } from 'tdl';
 import { markdownToTelegramEntities } from '@vcc-community/telegramify-markdown';
 
 import {
@@ -173,7 +174,7 @@ export class TelePilot implements INodeType {
 		debug('Executing telePilot node, resource=' + resource + ', operation=' + operation);
 
 		let result;
-		let client;
+		let client: Client;
 		if (resource === 'login') {
 			if (operation === 'login') {
 
@@ -367,14 +368,14 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'getUser') {
 					const user_id = this.getNodeParameter('user_id', 0) as string;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getUser',
 						user_id,
 					});
 					returnData.push(result);
 				} else if (operation === 'getUserFullInfo') {
 					const user_id = this.getNodeParameter('user_id', 0) as string;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getUserFullInfo',
 						user_id,
 					});
@@ -382,7 +383,7 @@ export class TelePilot implements INodeType {
 				} else if (operation === 'createPrivateChat') {
 					const user_id = this.getNodeParameter('user_id', 0) as string;
 					const force = this.getNodeParameter('force', 0) as string;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'createPrivateChat',
 						user_id,
 						force,
@@ -390,7 +391,7 @@ export class TelePilot implements INodeType {
 					returnData.push(result);
 				} else if (operation === 'createNewSecretChat') {
 					const user_id = this.getNodeParameter('user_id', 0) as string;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'createNewSecretChat',
 						user_id,
 					});
@@ -398,7 +399,7 @@ export class TelePilot implements INodeType {
 				}
 			} else if (resource === 'contact') {
 				if (operation === 'getContacts') {
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getContacts',
 					});
 					returnData.push(result);
@@ -408,7 +409,7 @@ export class TelePilot implements INodeType {
 					const chat_id = this.getNodeParameter('chat_id', 0) as string;
 					const from_message_id = this.getNodeParameter('from_message_id', 0) as string;
 					const limit = this.getNodeParameter('limit', 0) as number;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getChatHistory',
 						chat_id,
 						from_message_id,
@@ -1004,21 +1005,21 @@ export class TelePilot implements INodeType {
 			} else if (resource === 'group') {
 				if (operation === 'getSupergroup') {
 					const supergroup_id = this.getNodeParameter('supergroup_id', 0);
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getSupergroup',
 						supergroup_id,
 					});
 					returnData.push(result);
 				} else if (operation === 'getSupergroupFullInfo') {
 					const supergroup_id = this.getNodeParameter('supergroup_id', 0);
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getSupergroupFullInfo',
 						supergroup_id,
 					});
 					returnData.push(result);
 				} else if (operation === 'getSupergroupTopics') {
 					const supergroup_id = this.getNodeParameter('supergroup_id', 0) as number;
-					result = await client.invoke({
+					result = await client!.invoke({
 						_: 'getForumTopics',
 						chat_id: supergroup_id,
 						limit: 100, // Default TDLib limit for this call
@@ -1030,7 +1031,7 @@ export class TelePilot implements INodeType {
 					const jsonString = this.getNodeParameter('request_json', 0)  as string;
 					const obj = JSON.parse(jsonString)
 					debug(`Request JSON is : ${jsonString}`);
-					result = await client.invoke(obj);
+					result = await client!.invoke(obj);
 					returnData.push(result);
 				}
 			}

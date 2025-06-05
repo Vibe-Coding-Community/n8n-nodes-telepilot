@@ -4,6 +4,12 @@ import {
 	INodeProperties,
 } from 'n8n-workflow';
 
+export interface ITelePilotCredentials {
+	apiId: string;
+	apiHash: string;
+	phoneNumber: string;
+}
+
 export class TelePilotApi implements ICredentialType {
 	name = 'telePilotApi';
 	displayName = 'Personal Telegram CoPilot API';
