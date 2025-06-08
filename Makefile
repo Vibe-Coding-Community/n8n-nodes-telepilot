@@ -17,7 +17,8 @@ clean:
 	rm -rf node_modules/
 
 unlink:
-	cd ~/.n8n/nodes/ &&	npm unlink n8n-nodes-telepilot
+	cd ~/.n8n/nodes/ &&	npm unlink @vcc-community/n8n-nodes-telepilot
+
 link:
 	npm link
-	cd ~/.n8n/ && mkdir -p nodes && cd nodes && npm link n8n-nodes-telepilot
+	cd ~/.n8n/ && mkdir -p nodes && cd nodes && npm link @vcc-community/n8n-nodes-telepilot

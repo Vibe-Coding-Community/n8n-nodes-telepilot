@@ -44,4 +44,4 @@ jobs:
       - name: Publish to npm
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Убедитесь, что секрет NPM_TOKEN существует в настройках репозитория GitHub
+          NODE_AUTH_TOKEN: ${{ secrets.REGISTRY_TOKEN }} # Убедитесь, что секрет NPM_TOKEN существует в настройках репозитория GitHub
